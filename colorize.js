@@ -10,12 +10,27 @@ function loadSettings() {
     }, function(items) { settings = items.settings; });
 }
 
+colorize = () => {
+  var iframe = document.getElementById("microConsole-Logs");
+  if (!iframe) {
+    iframe = document
+  };
+
+  const innerDocument = iframe.contentDocument
+    ? iframe.contentDocument
+    : iframe.contentWindow;
+  
+  if (!innerDocument) return false;
+
+  colorizeLogGroup(innerDocument);
+}
+
 function getColorsByLogLevel(logMessageText) {
   var result = {}
   if (logMessageText.indexOf("INFO") !== -1) {
     result.color = settings.InfoColor;
     result.bgColor = settings.InfoBgColor;
-  } else if (logMessageText.indexOf("WARN") !== -1) {
+  } else if (logMessageText.indexOf("WARNING") !== -1) {
     result.color = settings.WarningColor;
     result.bgColor = settings.WarningBgColor;
   } else if (logMessageText.indexOf("ERROR") !== -1) {
@@ -24,12 +39,12 @@ function getColorsByLogLevel(logMessageText) {
   } else if (logMessageText.indexOf("FATAL") !== -1) {
       result.color = settings.ErrorColor;
       result.bgColor = settings.ErrorBgColor;
-  } else if (logMessageText.indexOf("DEBUG") !== -1) {
-    result.color = settings.DebugColor;
-    result.bgColor = settings.DebugBgColor;
   } else if (logMessageText.indexOf("TRACE") !== -1) {
     result.color = settings.TraceColor;
     result.bgColor = settings.TraceBgColor;
+  } else if (logMessageText.indexOf("START") !== -1 || logMessageText.indexOf("END") !== -1) {
+    result.color = settings.DebugColor;
+    result.bgColor = settings.DebugBgColor
   } else {
     result.color = settings.DefaultColor;
     result.bgColor = settings.DefaultBgColor;
@@ -40,7 +55,6 @@ function getColorsByLogLevel(logMessageText) {
 function colorizeLogGroup(innerDocument) {
     const logMessages = innerDocument.querySelectorAll('[class^="awsui_row"]');
     if (logMessages.length === 0) return false;
-    console.log('Calling colorizeLogGroup');
     logMessages.forEach(log => {
         const logMessageText = log.innerText;
         if (logMessageText) {

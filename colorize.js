@@ -4,36 +4,38 @@
  * http://github.com/yusufff
  */
 
-const WarningBgColor = "#FFFF80",
-  InfoBgColor = "#2124B9",
-  DebugBgColor = "#2124B9",
-  ErrorBgColor = "#FFB3B3",
-  TraceBgColor = "#FFFFFF",
-  DefaultBgColor = "#FFFFFF",
-  WarningColor = "#000000",
-  InfoColor = "#FFFFFF",
-  DebugColor = "#FFFFFF",
-  ErrorColor = "#000000",
-  TraceColor = "#888888",
-  DefaultColor = "#000000";
+function loadSettings() {
+    chrome.storage.sync.get({
+      settings: settings
+    }, function(items) { settings = items.settings; });
+}
 
-const linebreakPattern = "@@"
-
-colorize = () => {
-  var iframe = document.getElementById("microConsole-Logs");
-  if (!iframe) {
-    iframe = document
-  };
-
-  const innerDocument = iframe.contentDocument
-    ? iframe.contentDocument
-    : iframe.contentWindow;
-  
-  console.log('innerDocument is:', innerDocument);
-  if (!innerDocument) return false;
-
-  colorizeLogGroup(innerDocument);
-};
+function getColorsByLogLevel(logMessageText) {
+  var result = {}
+  if (logMessageText.indexOf("INFO") !== -1) {
+    result.color = settings.InfoColor;
+    result.bgColor = settings.InfoBgColor;
+  } else if (logMessageText.indexOf("WARN") !== -1) {
+    result.color = settings.WarningColor;
+    result.bgColor = settings.WarningBgColor;
+  } else if (logMessageText.indexOf("ERROR") !== -1) {
+    result.color = settings.ErrorColor;
+    result.bgColor = settings.ErrorBgColor;
+  } else if (logMessageText.indexOf("FATAL") !== -1) {
+      result.color = settings.ErrorColor;
+      result.bgColor = settings.ErrorBgColor;
+  } else if (logMessageText.indexOf("DEBUG") !== -1) {
+    result.color = settings.DebugColor;
+    result.bgColor = settings.DebugBgColor;
+  } else if (logMessageText.indexOf("TRACE") !== -1) {
+    result.color = settings.TraceColor;
+    result.bgColor = settings.TraceBgColor;
+  } else {
+    result.color = settings.DefaultColor;
+    result.bgColor = settings.DefaultBgColor;
+  }
+  return result;
+}
 
 function colorizeLogGroup(innerDocument) {
     const logMessages = innerDocument.querySelectorAll('[class^="awsui_row"]');
@@ -81,5 +83,6 @@ function getColorsByLogLevel(logMessageText) {
 }
 
 const colorizeInterval = setInterval(() => {
+  loadSettings();
   window.requestAnimationFrame(colorize);
 }, 3000);
